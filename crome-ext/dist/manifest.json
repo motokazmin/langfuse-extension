@@ -1,0 +1,53 @@
+{
+  "manifest_version": 3,
+  "name": "AI-Аналитик для Langfuse",
+  "version": "0.2.0",
+  "description": "Внедряет AI-анализ для отладки трейсов на Langfuse с полным циклом обмена данными",
+  "permissions": [
+    "storage",
+    "activeTab",
+    "sidePanel"
+  ],
+  "host_permissions": [
+    "https://cloud.langfuse.com/*",
+    "http://localhost:8080/*"
+  ],
+  "background": {
+    "service_worker": "service-worker-loader.js",
+    "type": "module"
+  },
+  "content_scripts": [
+    {
+      "js": [
+        "src/content-script/injector.js"
+      ],
+      "matches": [
+        "https://cloud.langfuse.com/*"
+      ],
+      "run_at": "document_start",
+      "all_frames": false
+    }
+  ],
+  "side_panel": {
+    "default_path": "sidepanel.html"
+  },
+  "action": {
+    "default_title": "Открыть AI-Аналитик"
+  },
+  "icons": {
+    "16": "icons/icon16.png",
+    "48": "icons/icon48.png",
+    "128": "icons/icon128.png"
+  },
+  "web_accessible_resources": [
+    {
+      "matches": [
+        "https://cloud.langfuse.com/*"
+      ],
+      "resources": [
+        "src/content-script/injector.js"
+      ],
+      "use_dynamic_url": false
+    }
+  ]
+}

@@ -1,0 +1,30 @@
+{
+  "version": 1,
+  "hooks": {
+    "beforeSubmitPrompt": [
+      {
+        "command": "node .cursor/hooks/hook-handler.js"
+      }
+    ],
+    "afterAgentResponse": [
+      {
+        "command": "node .cursor/hooks/hook-handler.js"
+      }
+    ],
+    "afterAgentThought": [
+      {
+        "command": "node .cursor/hooks/hook-handler.js"
+      }
+    ],
+    "afterFileEdit": [
+      {
+        "command": "node .cursor/hooks/hook-handler.js"
+      }
+    ],
+    "stop": [
+      {
+        "command": "node .cursor/hooks/hook-handler.js"
+      }
+    ]
+  }
+}
