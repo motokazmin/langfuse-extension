@@ -236,6 +236,7 @@ Shell команда 'npm install' выполнялась 12 секунд (82% �
 - **Chrome Extension:** [crome/README.md](./crome/README.md)
 - **Backend:** [langfuse-analyzer-backend/README.md](./langfuse-analyzer-backend/README.md)
 - **Тестовый проект:** [blog-api/README.md](./blog-api/README.md)
+- **Статья на Хабре:** https://habr.com/ru/articles/987230/
 
 ---
 
