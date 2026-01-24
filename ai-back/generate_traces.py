@@ -11,7 +11,7 @@ load_dotenv()
 
 LANGFUSE_PUBLIC_KEY = os.getenv("LANGFUSE_PUBLIC_KEY")
 LANGFUSE_SECRET_KEY = os.getenv("LANGFUSE_SECRET_KEY")
-LANGFUSE_HOST = os.getenv("LANGFUSE_BASEURL", "https://cloud.langfuse.com")
+LANGFUSE_BASE_URL = os.getenv("LANGFUSE_BASEURL", "https://cloud.langfuse.com")
 
 if not all([LANGFUSE_PUBLIC_KEY, LANGFUSE_SECRET_KEY]):
     print("❌ Ошибка: Не все переменные окружения установлены.")
@@ -21,7 +21,7 @@ print("Переменные окружения успешно загружены
 
 def create_trace(name, user_id, metadata=None):
     """Создаёт трейс через HTTP API"""
-    url = f"{LANGFUSE_HOST}/api/public/ingestion"
+    url = f"{LANGFUSE_BASE_URL}/api/public/ingestion"
     
     trace_id = str(uuid.uuid4())
     timestamp = datetime.now(timezone.utc).isoformat()
@@ -57,7 +57,7 @@ def create_trace(name, user_id, metadata=None):
 
 def create_span(trace_id, name, input_data, output_data, level="DEFAULT", latency_ms=100):
     """Создаёт span в трейсе"""
-    url = f"{LANGFUSE_HOST}/api/public/ingestion"
+    url = f"{LANGFUSE_BASE_URL}/api/public/ingestion"
     
     span_id = str(uuid.uuid4())
     start_time = datetime.now(timezone.utc)
@@ -97,7 +97,7 @@ def create_span(trace_id, name, input_data, output_data, level="DEFAULT", latenc
 
 def create_generation(trace_id, name, model, input_tokens, output_tokens, cost):
     """Создаёт generation в трейсе"""
-    url = f"{LANGFUSE_HOST}/api/public/ingestion"
+    url = f"{LANGFUSE_BASE_URL}/api/public/ingestion"
     
     gen_id = str(uuid.uuid4())
     timestamp = datetime.now(timezone.utc).isoformat()

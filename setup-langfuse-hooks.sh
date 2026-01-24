@@ -18,13 +18,26 @@ else
     mkdir -p .cursor/hooks
 fi
 
+# 1.5. Копируем hooks.json если есть
+if [ -f "cursor-langfuse-ext/hooks.json" ]; then
+    echo "📁 Копирую hooks.json..."
+    cp cursor-langfuse-ext/hooks.json .cursor/
+    echo "✅ hooks.json скопирован"
+elif [ -f "cursor-langfuse-ext/.cursor/hooks.json" ]; then
+    echo "📁 Копирую hooks.json..."
+    cp cursor-langfuse-ext/.cursor/hooks.json .cursor/
+    echo "✅ hooks.json скопирован"
+else
+    echo "⚠️  hooks.json не найден"
+fi
+
 # 2. Создаем .env.example в корне проекта
 echo "📝 Создаю .env.example в корне..."
 cat > .env.example << 'EOF'
 # Langfuse Configuration (используется для cursor hooks и ai-back)
 LANGFUSE_PUBLIC_KEY=pk-lf-your-public-key
 LANGFUSE_SECRET_KEY=sk-lf-your-secret-key
-LANGFUSE_HOST=https://cloud.langfuse.com
+LANGFUSE_BASE_URL=https://cloud.langfuse.com
 
 # OpenRouter Configuration (для ai-back/ - AI анализ трейсов)
 OPENROUTER_API_KEY=sk-or-your-api-key

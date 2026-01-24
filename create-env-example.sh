@@ -19,7 +19,7 @@ LANGFUSE_SECRET_KEY=sk-lf-your-secret-key-here
 # Langfuse Host URL
 # Для cloud: https://cloud.langfuse.com
 # Для self-hosted: ваш URL
-LANGFUSE_HOST=https://cloud.langfuse.com
+LANGFUSE_BASE_URL=https://cloud.langfuse.com
 
 # Инструкция:
 # 1. Скопируйте этот файл: cp .env.example .env
