@@ -44,16 +44,18 @@ func (c *langfuseClient) GetTrace(ctx context.Context, traceID string) (map[stri
 
 		req, err := http.NewRequestWithContext(ctx, "GET", url, nil)
 		if err != nil {
-			log.Printf("   ❌ Ошибка создания запроса (попытка %d): %v", attempt, err)
-			lastErr = err
+			msg := fmt.Sprintf("failed to create request for trace %s (attempt %d/%d): %w", traceID, attempt, 3, err)
+			log.Printf("   ❌ %s", msg)
+			lastErr = fmt.Errorf(msg)
 			continue
 		}
 		req.SetBasicAuth(c.publicKey, c.secretKey)
 
 		resp, err := c.client.Do(req)
 		if err != nil {
-			log.Printf("   ⚠️  Ошибка HTTP запроса (попытка %d): %v", attempt, err)
-			lastErr = err
+			msg := fmt.Sprintf("failed to fetch trace %s from Langfuse (attempt %d/%d): %w", traceID, attempt, 3, err)
+			log.Printf("   ⚠️  %s", msg)
+			lastErr = fmt.Errorf(msg)
 			continue
 		}
 
@@ -65,14 +67,16 @@ func (c *langfuseClient) GetTrace(ctx context.Context, traceID string) (map[stri
 
 			if resp.StatusCode != http.StatusOK {
 				bodyBytes, _ := io.ReadAll(resp.Body)
-				log.Printf("   ⚠️  Тело ответа: %s", string(bodyBytes))
-				return nil, fmt.Errorf("Langfuse API вернул статус: %s", resp.Status)
+				msg := fmt.Sprintf("Langfuse API returned %s for trace %s: %s", resp.Status, traceID, string(bodyBytes))
+				log.Printf("   ⚠️  %s", msg)
+				return nil, fmt.Errorf(msg)
 			}
 
 			var data map[string]interface{}
 			if err := json.NewDecoder(resp.Body).Decode(&data); err != nil {
-				log.Printf("   ❌ Ошибка декодирования JSON: %v", err)
-				return nil, err
+				msg := fmt.Sprintf("failed to decode Langfuse response for trace %s: %w", traceID, err)
+				log.Printf("   ❌ %s", msg)
+				return nil, fmt.Errorf(msg)
 			}
 
 			log.Printf("   ✅ Данные трейса успешно получены")
@@ -88,6 +92,7 @@ func (c *langfuseClient) GetTrace(ctx context.Context, traceID string) (map[stri
 		}
 	}
 
-	log.Printf("   ❌ Все попытки исчерпаны")
-	return nil, lastErr
+	msg := fmt.Sprintf("failed to retrieve trace %s after 3 attempts: %v", traceID, lastErr)
+	log.Printf("   ❌ %s", msg)
+	return nil, fmt.Errorf(msg)
 }
