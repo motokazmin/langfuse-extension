@@ -10,7 +10,19 @@ import (
 	"time"
 )
 
+// LangfuseRepository defines the interface for interacting with Langfuse API.
+// It provides methods to fetch trace data from Langfuse with automatic retry logic.
 type LangfuseRepository interface {
+	// GetTrace fetches trace data from Langfuse by trace ID.
+	// It retries up to 3 times with exponential backoff on failure.
+	//
+	// Параметры:
+	//   - ctx: Context for cancellation and timeout
+	//   - traceID: Unique identifier of the trace
+	//
+	// Возвращает:
+	//   - Trace data as a map
+	//   - Error if all retry attempts fail or trace not found
 	GetTrace(ctx context.Context, traceID string) (map[string]interface{}, error)
 }
 
@@ -21,6 +33,15 @@ type langfuseClient struct {
 	client    *http.Client
 }
 
+// NewLangfuseRepository creates a new Langfuse repository client.
+// It initializes HTTP client with 30-second timeout and returns a configured LangfuseRepository instance.
+//
+// Параметры:
+//   - publicKey: Langfuse public API key for authentication
+//   - secretKey: Langfuse secret API key for authentication
+//   - baseURL: Langfuse API base URL (e.g., https://cloud.langfuse.com)
+//
+// Возвращает: Configured LangfuseRepository instance.
 func NewLangfuseRepository(publicKey, secretKey, baseURL string) LangfuseRepository {
 	return &langfuseClient{
 		publicKey: publicKey,

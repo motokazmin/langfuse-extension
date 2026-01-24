@@ -11,20 +11,43 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+// AnalyzeHandler handles HTTP POST /analyze requests for trace analysis.
+// It validates requests, delegates to AnalyzeService, and formats responses with error handling.
 type AnalyzeHandler struct {
 	analyzeService *service.AnalyzeService
 }
 
+// NewAnalyzeHandler creates a new AnalyzeHandler instance.
+// Параметры:
+//   - analyzeService: Service for analyzing traces
+//
+// Возвращает: Configured AnalyzeHandler instance.
 func NewAnalyzeHandler(analyzeService *service.AnalyzeService) *AnalyzeHandler {
 	return &AnalyzeHandler{
 		analyzeService: analyzeService,
 	}
 }
 
+// AnalyzeRequest represents the JSON payload for trace analysis requests.
 type AnalyzeRequest struct {
 	TraceID string `json:"traceId" binding:"required"`
 }
 
+// Handle processes HTTP POST /analyze requests for trace analysis.
+// It expects JSON body with traceId field, delegates to AnalyzeService, and returns analysis result.
+// Handles specific errors including rate limits (429), insufficient credits (402), and service unavailability (503).
+//
+// Request body:
+//
+//	{"traceId": "string"}
+//
+// Response (success):
+//
+//	{"data": {...}}
+//
+// Response (error):
+//
+//	{"error": "string", "code": "ERROR_CODE"}
 func (h *AnalyzeHandler) Handle(c *gin.Context) {
 	log.Println("==============================================")
 	log.Println("📥 НОВЫЙ ЗАПРОС НА АНАЛИЗ")
