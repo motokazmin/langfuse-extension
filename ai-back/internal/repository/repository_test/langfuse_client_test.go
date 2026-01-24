@@ -227,6 +227,31 @@ func TestGetTraceFromLangfuse_InvalidRequest(t *testing.T) {
 		"Ошибка должна быть связана с невалидным URL")
 }
 
+// TestGetTraceFromLangfuse_MalformedURL проверяет обработку синтаксически неправильного URL
+func TestGetTraceFromLangfuse_MalformedURL(t *testing.T) {
+	// Синтаксически неправильный URL (без scheme)
+	client := &http.Client{Timeout: 30 * time.Second}
+	_, err := callGetTraceFromLangfuseWithClientError("not-a-url", "pk-test", "sk-test", client)
+
+	assert.Error(t, err)
+	assert.True(t,
+		strings.Contains(err.Error(), "unsupported protocol") ||
+			strings.Contains(err.Error(), "no such host") ||
+			strings.Contains(err.Error(), "failed to create"),
+		"Ошибка должна быть связана с неправильным URL")
+}
+
+// TestGetTraceFromLangfuse_EmptyURL проверяет обработку пустого URL
+func TestGetTraceFromLangfuse_EmptyURL(t *testing.T) {
+	client := &http.Client{Timeout: 30 * time.Second}
+	_, err := callGetTraceFromLangfuseWithClientError("", "pk-test", "sk-test", client)
+
+	assert.Error(t, err)
+	// Пустой URL приведёт к ошибке при попытке подключения
+	// Может быть разная ошибка в зависимости от реализации
+	assert.NotNil(t, err, "Должна быть ошибка при пустом URL")
+}
+
 // TestGetTraceFromLangfuse_AllRetriesFail проверяет когда все retry не удаются
 func TestGetTraceFromLangfuse_AllRetriesFail(t *testing.T) {
 	attempts := 0
