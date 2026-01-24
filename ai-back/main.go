@@ -313,7 +313,12 @@ func getTraceFromLangfuse(traceID string) (map[string]interface{}, error) {
 			time.Sleep(time.Duration(attempt) * time.Second) // Экспоненциальная задержка
 		}
 
-		req, _ := http.NewRequest("GET", url, nil)
+		req, err := http.NewRequest("GET", url, nil)
+		if err != nil {
+			log.Printf("   ❌ Ошибка создания запроса (попытка %d): %v", attempt, err)
+			lastErr = err
+			continue
+		}
 		req.SetBasicAuth(publicKey, secretKey)
 
 		resp, err := client.Do(req)
@@ -322,26 +327,37 @@ func getTraceFromLangfuse(traceID string) (map[string]interface{}, error) {
 			lastErr = err
 			continue
 		}
-		defer resp.Body.Close()
 
-		log.Printf("   ✅ Статус ответа Langfuse: %d %s", resp.StatusCode, resp.Status)
+		// ✅ ИСПРАВЛЕНИЕ: Обворачиваем в анонимную функцию для корректного закрытия Body
+		// при каждой итерации, а не в конце всей функции
+		result, err := func() (map[string]interface{}, error) {
+			defer resp.Body.Close()
 
-		if resp.StatusCode != http.StatusOK {
-			bodyBytes, _ := io.ReadAll(resp.Body)
-			log.Printf("   ⚠️  Тело ответа: %s", string(bodyBytes))
-			lastErr = fmt.Errorf("Langfuse API вернул статус: %s", resp.Status)
-			continue
+			log.Printf("   ✅ Статус ответа Langfuse: %d %s", resp.StatusCode, resp.Status)
+
+			if resp.StatusCode != http.StatusOK {
+				bodyBytes, _ := io.ReadAll(resp.Body)
+				log.Printf("   ⚠️  Тело ответа: %s", string(bodyBytes))
+				return nil, fmt.Errorf("Langfuse API вернул статус: %s", resp.Status)
+			}
+
+			var data map[string]interface{}
+			if err := json.NewDecoder(resp.Body).Decode(&data); err != nil {
+				log.Printf("   ❌ Ошибка декодирования JSON: %v", err)
+				return nil, err
+			}
+
+			log.Printf("   ✅ Данные трейса успешно получены")
+			return data, nil
+		}()
+
+		if result != nil {
+			return result, nil
 		}
 
-		var data map[string]interface{}
-		if err := json.NewDecoder(resp.Body).Decode(&data); err != nil {
-			log.Printf("   ❌ Ошибка декодирования JSON: %v", err)
+		if err != nil {
 			lastErr = err
-			continue
 		}
-
-		log.Printf("   ✅ Данные трейса успешно получены")
-		return data, nil
 	}
 
 	log.Printf("   ❌ Все попытки исчерпаны")
